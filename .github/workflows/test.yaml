@@ -1,0 +1,33 @@
+name: Test
+
+on:
+  push:
+    branches-ignore:
+      - 'master'
+    tags-ignore:
+      - '**'
+
+concurrency:
+  group: test-${{ github.ref }}
+  # Consecutive pushes to branches will terminate running jobs
+  # Only the most recent job will continue
+  cancel-in-progress: true
+
+env:
+  APP_ENV: test
+  APP_DEBUG: 0
+
+jobs:
+  test:
+    needs: setup
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: 8.0
+          ini-values: assert.exception=1, zend.assertions=1
+          tools: cs2pr
+      - uses: ramsey/composer-install@v2
+      - name: PHPUnit
+        run: vendor/bin/phpunit
