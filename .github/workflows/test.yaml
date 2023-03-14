@@ -3,7 +3,7 @@ name: Test
 on:
   push:
     branches-ignore:
-      - 'master'
+      - 'main'
     tags-ignore:
       - '**'
 
@@ -19,13 +19,12 @@ env:
 
 jobs:
   test:
-    needs: setup
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
       - uses: shivammathur/setup-php@v2
         with:
-          php-version: 8.0
+          php-version: 8.1
           ini-values: assert.exception=1, zend.assertions=1
           tools: cs2pr
       - uses: ramsey/composer-install@v2
