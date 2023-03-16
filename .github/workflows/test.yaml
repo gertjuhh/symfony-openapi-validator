@@ -7,12 +7,6 @@ on:
     tags-ignore:
       - '**'
 
-concurrency:
-  group: test-${{ github.ref }}
-  # Consecutive pushes to branches will terminate running jobs
-  # Only the most recent job will continue
-  cancel-in-progress: true
-
 env:
   APP_ENV: test
   APP_DEBUG: 0
@@ -26,7 +20,6 @@ jobs:
         with:
           php-version: 8.1
           ini-values: assert.exception=1, zend.assertions=1
-          tools: cs2pr
       - uses: ramsey/composer-install@v2
       - name: PHPUnit
         run: vendor/bin/phpunit

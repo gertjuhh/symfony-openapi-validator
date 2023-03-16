@@ -1,0 +1,26 @@
+openapi: 3.0.3
+info:
+  title: Hello world
+  version: 1.0.0
+servers:
+  - url: 'http://localhost'
+paths:
+  "/hello-world":
+    get:
+      responses:
+        200:
+          description: Hello world request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HelloWorld"
+components:
+  schemas:
+    HelloWorld:
+      type: object
+      required:
+        - hello
+      properties:
+        hello:
+          type: string
+          example: "world"
