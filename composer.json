@@ -21,8 +21,8 @@
     "php": "^8.1",
     "league/openapi-psr7-validator": "^0.18.0",
     "nyholm/psr7": "^1.5",
-    "symfony/browser-kit": "^6.2",
-    "symfony/framework-bundle": "^6.2",
+    "symfony/browser-kit": "^5.4 || ^6.0",
+    "symfony/framework-bundle": "^5.4 || ^6.0",
     "symfony/psr-http-message-bridge": "^2.1"
   },
   "require-dev": {
