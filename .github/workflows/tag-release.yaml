@@ -1,0 +1,46 @@
+name: Tag release
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  tag-release:
+    runs-on: ubuntu-latest
+    # Only run on main branch, not for workflow_dispatch for example
+    if: github.ref == 'refs/heads/main'
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/github-script@v6
+        id: determine_pull_request
+        with:
+          # https://octokit.github.io/rest.js/v18#repos-list-pull-requests-associated-with-commit
+          # https://docs.github.com/en/rest/reference/pulls#list-pull-requests
+          script: |
+            return (
+              await github.rest.repos.listPullRequestsAssociatedWithCommit({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                commit_sha: context.sha,
+              })            
+            ).data[0];
+      - name: Bump version and push tag
+        if: steps.determine_pull_request.outputs.result &&
+          contains(fromJson(steps.determine_pull_request.outputs.result).labels.*.name, 'tag release') &&
+          fromJson(steps.determine_pull_request.outputs.result).merged_at != null
+        id: tag_version
+        uses: mathieudutour/github-tag-action@v6.1
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          tag_prefix: ''
+          create_annotated_tag: true
+      - name: Create a GitHub release
+        if: steps.determine_pull_request.outputs.result &&
+          contains(fromJson(steps.determine_pull_request.outputs.result).labels.*.name, 'tag release') &&
+          fromJson(steps.determine_pull_request.outputs.result).merged_at != null
+        uses: ncipollo/release-action@v1
+        with:
+          tag: ${{ steps.tag_version.outputs.new_tag }}
+          name: Release ${{ steps.tag_version.outputs.new_tag }}
+          body: ${{ steps.tag_version.outputs.changelog }}
