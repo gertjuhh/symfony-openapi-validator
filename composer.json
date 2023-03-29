@@ -19,7 +19,7 @@
   },
   "require": {
     "php": "^8.1",
-    "league/openapi-psr7-validator": "^0.18.0",
+    "league/openapi-psr7-validator": "^0.20",
     "nyholm/psr7": "^1.5",
     "symfony/browser-kit": "^5.4 || ^6.0",
     "symfony/framework-bundle": "^5.4 || ^6.0",
