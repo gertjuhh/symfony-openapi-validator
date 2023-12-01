@@ -12,7 +12,7 @@ jobs:
     if: github.ref == 'refs/heads/main'
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/github-script@v6
+      - uses: actions/github-script@v7
         id: determine_pull_request
         with:
           # https://octokit.github.io/rest.js/v18#repos-list-pull-requests-associated-with-commit
