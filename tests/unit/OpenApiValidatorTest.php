@@ -76,7 +76,7 @@ final class OpenApiValidatorTest extends TestCase
             new AssertionFailedError(
                 \sprintf(
                     '%s%s%s%s%s',
-                    'OpenAPI response error:',
+                    'OpenAPI response error at hello:',
                     "\n",
                     'Body does not match schema for content-type "application/json" for Response [get /hello-world 200]',
                     "\n",
