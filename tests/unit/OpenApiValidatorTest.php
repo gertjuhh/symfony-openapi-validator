@@ -42,7 +42,7 @@ final class OpenApiValidatorTest extends TestCase
             ->method('getRequest')
             ->willReturn($request);
 
-        self::expectExceptionObject(
+        $this->expectExceptionObject(
             new AssertionFailedError(
                 \sprintf(
                     '%s%s%s',
@@ -72,7 +72,7 @@ final class OpenApiValidatorTest extends TestCase
             ->method('getResponse')
             ->willReturn($response);
 
-        self::expectExceptionObject(
+        $this->expectExceptionObject(
             new AssertionFailedError(
                 \sprintf(
                     '%s%s%s%s%s',
@@ -81,6 +81,38 @@ final class OpenApiValidatorTest extends TestCase
                     'Body does not match schema for content-type "application/json" for Response [get /hello-world 200]',
                     "\n",
                     'Keyword validation failed: Required property \'hello\' must be present in the object'
+                )
+            )
+        );
+
+        self::assertOpenApiSchema('tests/openapi.yaml', $browser);
+    }
+
+    public function testValidatorThrowsErrorWhenNestedResponseIsInvalid(): void
+    {
+        $request = Request::create(uri: 'https://localhost/nested-property', server: [
+            'HTTP_X_REQUESTED_WITH',
+            'XMLHttpRequest',
+        ]);
+        $response = new JsonResponse(['nested' => new \stdClass()], headers: ['content-type' => 'application/json']);
+
+        $browser = $this->createMock(KernelBrowser::class);
+        $browser->expects(self::once())
+            ->method('getRequest')
+            ->willReturn($request);
+        $browser->expects(self::once())
+            ->method('getResponse')
+            ->willReturn($response);
+
+        $this->expectExceptionObject(
+            new AssertionFailedError(
+                \sprintf(
+                    '%s%s%s%s%s',
+                    'OpenAPI response error at nested.property:',
+                    "\n",
+                    'Body does not match schema for content-type "application/json" for Response [get /nested-property 200]',
+                    "\n",
+                    'Keyword validation failed: Required property \'property\' must be present in the object'
                 )
             )
         );

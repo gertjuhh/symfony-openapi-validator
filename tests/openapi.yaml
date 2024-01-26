@@ -5,7 +5,7 @@ info:
 servers:
   - url: 'http://localhost'
 paths:
-  "/hello-world":
+  /hello-world:
     get:
       responses:
         200:
@@ -13,7 +13,18 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/HelloWorld"
+                $ref: '#/components/schemas/HelloWorld'
+
+  /nested-property:
+    get:
+      responses:
+        200:
+          description: Nested property request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NestedProperty'
+
 components:
   schemas:
     HelloWorld:
@@ -23,4 +34,17 @@ components:
       properties:
         hello:
           type: string
-          example: "world"
+          example: 'world'
+
+    NestedProperty:
+      type: object
+      required:
+        - nested
+      properties:
+        nested:
+          type: object
+          required:
+            - property
+          properties:
+            property:
+              type: string
