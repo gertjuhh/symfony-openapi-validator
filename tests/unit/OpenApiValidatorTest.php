@@ -119,4 +119,91 @@ final class OpenApiValidatorTest extends TestCase
 
         self::assertOpenApiSchema('tests/openapi.yaml', $browser);
     }
+
+    public function testValidatorThrowsErrorWhenInputIsInvalid(): void
+    {
+        $request = Request::create(
+            uri: 'https://localhost/input-validation',
+            method: 'POST',
+            server: [
+                'CONTENT_TYPE' => 'application/json',
+            ],
+            content: \json_encode(['email' => 'john.doe'], \JSON_THROW_ON_ERROR),
+        );
+
+        $browser = $this->createMock(KernelBrowser::class);
+        $browser->expects(self::once())
+            ->method('getRequest')
+            ->willReturn($request);
+
+        $this->expectExceptionObject(new AssertionFailedError(
+            \sprintf(
+                '%s%s%s%s%s',
+                'OpenAPI request error at email:',
+                "\n",
+                'Body does not match schema for content-type "application/json" for Request [post /input-validation]',
+                "\n",
+                'Value \'john.doe\' does not match format email of type string',
+            )
+        ));
+
+        self::assertOpenApiSchema('tests/openapi.yaml', $browser);
+    }
+
+    public function testResponseValidatorWillThrowErrorWhenErrorResponseIsInvalid(): void
+    {
+        $request = Request::create(
+            uri: 'https://localhost/input-validation',
+            method: 'POST',
+            server: [
+                'CONTENT_TYPE' => 'application/json',
+            ],
+            content: \json_encode(['email' => 'john.doe'], \JSON_THROW_ON_ERROR),
+        );
+        $response = new JsonResponse(data: ['output' => 'invalid'], status: 422);
+
+        $browser = $this->createMock(KernelBrowser::class);
+        $browser->expects(self::exactly(2))
+            ->method('getRequest')
+            ->willReturn($request);
+        $browser->expects(self::once())
+            ->method('getResponse')
+            ->willReturn($response);
+
+        $this->expectExceptionObject(new AssertionFailedError(
+            \sprintf(
+                '%s%s%s%s%s',
+                'OpenAPI response error at message:',
+                "\n",
+                'Body does not match schema for content-type "application/json" for Response [post /input-validation 422]',
+                "\n",
+                'Keyword validation failed: Required property \'message\' must be present in the object',
+            )
+        ));
+
+        self::assertResponseAgainstOpenApiSchema('tests/openapi.yaml', $browser);
+    }
+
+    public function testResponseValidatorDoesNothingWhenResponseIsValid(): void
+    {
+        $request = Request::create(
+            uri: 'https://localhost/input-validation',
+            method: 'POST',
+            server: [
+                'CONTENT_TYPE' => 'application/json',
+            ],
+            content: \json_encode(['email' => 'john.doe'], \JSON_THROW_ON_ERROR),
+        );
+        $response = new JsonResponse(data: ['message' => 'invalid'], status: 422);
+
+        $browser = $this->createMock(KernelBrowser::class);
+        $browser->expects(self::exactly(2))
+            ->method('getRequest')
+            ->willReturn($request);
+        $browser->expects(self::once())
+            ->method('getResponse')
+            ->willReturn($response);
+
+        self::assertResponseAgainstOpenApiSchema('tests/openapi.yaml', $browser);
+    }
 }

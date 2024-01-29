@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Gertjuhh\SymfonyOpenapiValidator;
 
 use League\OpenAPIValidation\PSR7\Exception\ValidationFailed;
+use League\OpenAPIValidation\PSR7\OperationAddress;
 use League\OpenAPIValidation\PSR7\ValidatorBuilder;
 use League\OpenAPIValidation\Schema\Exception\SchemaMismatch;
 use Nyholm\Psr7\Factory\Psr17Factory;
@@ -32,9 +33,27 @@ trait OpenApiValidator
             throw self::wrapValidationException($exception, 'request');
         }
 
+       self::assertResponseAgainstOpenApiSchema($schema, $client, $match);
+    }
+
+    public static function assertResponseAgainstOpenApiSchema(
+        string $schema,
+        KernelBrowser $client,
+        OperationAddress|null $operationAddress = null
+    ): void {
+        $builder = self::getValidatorBuilder($schema);
+        $psrFactory = self::getPsrHttpFactory();
+
+        if ($operationAddress === null) {
+            $operationAddress = new OperationAddress(
+                path: $client->getRequest()->getPathInfo(),
+                method: strtolower($client->getRequest()->getMethod()),
+            );
+        }
+
         try {
             $builder->getResponseValidator()
-                ->validate($match, $psrFactory->createResponse($client->getResponse()));
+                ->validate($operationAddress, $psrFactory->createResponse($client->getResponse()));
         } catch (ValidationFailed $exception) {
             throw self::wrapValidationException($exception, 'response');
         }
