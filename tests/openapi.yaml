@@ -48,12 +48,12 @@ paths:
           content:
             application/json:
               schema:
-                  type: object
-                  required:
+                type: object
+                required:
                   - message
-                  properties:
-                    message:
-                      type: string
+                properties:
+                  message:
+                    type: string
 
 components:
   schemas:
