@@ -25,6 +25,36 @@ paths:
               schema:
                 $ref: '#/components/schemas/NestedProperty'
 
+  /input-validation:
+    post:
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type:
+                object
+              required:
+                - email
+              properties:
+                email:
+                  type: string
+                  format: email
+                  example: john.doe@example.com
+      responses:
+        200:
+          description: Ok
+        422:
+          description: Input is invalid
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - message
+                properties:
+                  message:
+                    type: string
+
 components:
   schemas:
     HelloWorld:
