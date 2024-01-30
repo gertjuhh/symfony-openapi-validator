@@ -88,6 +88,40 @@ final class OpenApiValidatorTest extends TestCase
         self::assertOpenApiSchema('tests/openapi.yaml', $browser);
     }
 
+    public function testValidatorThrowsErrorContainingInnerExceptionsWhenResponseFailsOneOfValidation(): void
+    {
+        $request = Request::create(uri: 'https://localhost/match-oneof', server: [
+            'HTTP_X_REQUESTED_WITH',
+            'XMLHttpRequest',
+        ]);
+        $response = new JsonResponse(['foo' => 'bar'], headers: ['content-type' => 'application/json']);
+
+        $browser = $this->createMock(KernelBrowser::class);
+        $browser->expects(self::once())
+            ->method('getRequest')
+            ->willReturn($request);
+        $browser->expects(self::once())
+            ->method('getResponse')
+            ->willReturn($response);
+
+        $this->expectExceptionObject(
+            new AssertionFailedError(
+                \implode(
+                    "\n",
+                    [
+                        'OpenAPI response error:',
+                        'Body does not match schema for content-type "application/json" for Response [get /match-oneof 200]',
+                        'Keyword validation failed: Data must match exactly one schema, but matched none',
+                        '==> Schema 1: Keyword validation failed: Required property \'hello\' must be present in the object (at hello)',
+                        '==> Schema 2: Keyword validation failed: Required property \'nested\' must be present in the object (at nested)',
+                    ],
+                ),
+            )
+        );
+
+        self::assertOpenApiSchema('tests/openapi.yaml', $browser);
+    }
+
     public function testValidatorThrowsErrorWhenNestedResponseIsInvalid(): void
     {
         $request = Request::create(uri: 'https://localhost/nested-property', server: [

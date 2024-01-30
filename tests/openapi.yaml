@@ -15,6 +15,18 @@ paths:
               schema:
                 $ref: '#/components/schemas/HelloWorld'
 
+  /match-oneof:
+    get:
+      responses:
+        200:
+          description: Hello world request
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/HelloWorld'
+                  - $ref: '#/components/schemas/NestedProperty'
+
   /nested-property:
     get:
       responses:
