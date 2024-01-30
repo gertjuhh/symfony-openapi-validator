@@ -20,6 +20,9 @@ composer require --dev gertjuhh/symfony-openapi-validator
 - Call `self::assertOpenApiSchema(<schema>, <client>);`
     - `schema`: path to corresponding OpenAPI yaml schema
     - `client`: the client used to make the request
+- Or optionally use the `self::assertResponseAgainstOpenApiSchema(<schema>, <client>);` to only validate the response
+    - The `operationAddress` can be passed as a third argument for this function but by default it will retrieve the 
+      operation from the `client`.
 
 ## Example
 
