@@ -7,6 +7,7 @@ namespace Gertjuhh\SymfonyOpenapiValidator;
 use League\OpenAPIValidation\PSR7\Exception\ValidationFailed;
 use League\OpenAPIValidation\PSR7\OperationAddress;
 use League\OpenAPIValidation\PSR7\ValidatorBuilder;
+use League\OpenAPIValidation\Schema\Exception\NotEnoughValidSchemas;
 use League\OpenAPIValidation\Schema\Exception\SchemaMismatch;
 use Nyholm\Psr7\Factory\Psr17Factory;
 use PHPUnit\Framework\AssertionFailedError;
@@ -33,13 +34,13 @@ trait OpenApiValidator
             throw self::wrapValidationException($exception, 'request');
         }
 
-       self::assertResponseAgainstOpenApiSchema($schema, $client, $match);
+        self::assertResponseAgainstOpenApiSchema($schema, $client, $match);
     }
 
     public static function assertResponseAgainstOpenApiSchema(
         string $schema,
         KernelBrowser $client,
-        OperationAddress|null $operationAddress = null
+        OperationAddress | null $operationAddress = null,
     ): void {
         $builder = self::getValidatorBuilder($schema);
         $psrFactory = self::getPsrHttpFactory();
@@ -57,6 +58,20 @@ trait OpenApiValidator
         } catch (ValidationFailed $exception) {
             throw self::wrapValidationException($exception, 'response');
         }
+    }
+
+    private static function extractPathFromException(\Throwable $exception): string | null
+    {
+        if ($exception instanceof SchemaMismatch
+            && ($breadcrumb = $exception->dataBreadCrumb())
+            // league/openapi-psr7-validator can return an array with a single null value
+            // when the breadcrumb's first compoundIndex is null; filter this out here
+            && !empty($chain = array_filter($breadcrumb->buildChain()))
+        ) {
+            return \implode('.', $chain);
+        }
+
+        return null;
     }
 
     private static function getPsrHttpFactory(): PsrHttpFactory
@@ -86,8 +101,21 @@ trait OpenApiValidator
         while (null !== ($exception = $exception->getPrevious())) {
             $message[] = $exception->getMessage();
 
-            if (!$at && $exception instanceof SchemaMismatch && $breadcrumb = $exception->dataBreadCrumb()) {
-                $at = \implode('.', $breadcrumb->buildChain());
+            if (!$at) {
+                $at = self::extractPathFromException($exception);
+            }
+
+            if ($exception instanceof NotEnoughValidSchemas) {
+                foreach ($exception->innerExceptions() as $option => $innerException) {
+                    $innerAt = self::extractPathFromException($innerException);
+
+                    $message[] = sprintf(
+                        '==> Schema %d: %s%s',
+                        ((int)$option) + 1,
+                        $innerException->getMessage(),
+                        $innerAt ? sprintf(' (at %s)', $innerAt) : '',
+                    );
+                }
             }
         }
 
