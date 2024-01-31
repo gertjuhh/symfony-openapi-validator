@@ -60,7 +60,7 @@ trait OpenApiValidator
         }
     }
 
-    private static function extractPathFromException(\Throwable $exception): ?string
+    private static function extractPathFromException(\Throwable $exception): string | null
     {
         if ($exception instanceof SchemaMismatch && $breadcrumb = $exception->dataBreadCrumb()) {
             return \implode('.', $breadcrumb->buildChain());

@@ -94,7 +94,7 @@ final class OpenApiValidatorTest extends TestCase
             'HTTP_X_REQUESTED_WITH',
             'XMLHttpRequest',
         ]);
-        $response = new JsonResponse(['foo' => 'bar'], headers: ['content-type' => 'application/json']);
+        $response = new JsonResponse(['nested' => new \stdClass()], headers: ['content-type' => 'application/json']);
 
         $browser = $this->createMock(KernelBrowser::class);
         $browser->expects(self::once())
@@ -113,7 +113,7 @@ final class OpenApiValidatorTest extends TestCase
                         'Body does not match schema for content-type "application/json" for Response [get /match-oneof 200]',
                         'Keyword validation failed: Data must match exactly one schema, but matched none',
                         '==> Schema 1: Keyword validation failed: Required property \'hello\' must be present in the object (at hello)',
-                        '==> Schema 2: Keyword validation failed: Required property \'nested\' must be present in the object (at nested)',
+                        '==> Schema 2: Keyword validation failed: Required property \'property\' must be present in the object (at nested.property)',
                     ],
                 ),
             )
