@@ -62,8 +62,13 @@ trait OpenApiValidator
 
     private static function extractPathFromException(\Throwable $exception): string | null
     {
-        if ($exception instanceof SchemaMismatch && $breadcrumb = $exception->dataBreadCrumb()) {
-            return \implode('.', $breadcrumb->buildChain());
+        if ($exception instanceof SchemaMismatch
+            && ($breadcrumb = $exception->dataBreadCrumb())
+            // league/openapi-psr7-validator can return an array with a single null value
+            // when the breadcrumb's first compoundIndex is null; filter this out here
+            && !empty($chain = array_filter($breadcrumb->buildChain()))
+        ) {
+            return \implode('.', $chain);
         }
 
         return null;
@@ -118,7 +123,7 @@ trait OpenApiValidator
             \sprintf(
                 'OpenAPI %s error%s:%s%s',
                 $scope,
-                !empty($at)
+                $at !== null
                     ? sprintf(' at %s', $at)
                     : '',
                 "\n",
