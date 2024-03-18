@@ -30,7 +30,7 @@ jobs:
           contains(fromJson(steps.determine_pull_request.outputs.result).labels.*.name, 'tag release') &&
           fromJson(steps.determine_pull_request.outputs.result).merged_at != null
         id: tag_version
-        uses: mathieudutour/github-tag-action@v6.1
+        uses: mathieudutour/github-tag-action@v6.2
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           tag_prefix: ''
