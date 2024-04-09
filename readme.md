@@ -24,6 +24,26 @@ composer require --dev gertjuhh/symfony-openapi-validator
     - The `operationAddress` can be passed as a third argument for this function but by default it will retrieve the 
       operation from the `client`.
 
+### Setting up a cache
+
+The [underlying library can use a PSR-6 cache](https://github.com/thephpleague/openapi-psr7-validator#caching-layer--psr-6-support).
+This provides a significant speedup when running multiple tests against a single schema, since it can be parsed once and 
+reused.
+
+In order to activate this cache, you can pass a PSR-6 cache instance to the static property
+`\Gertjuhh\SymfonyOpenapiValidator\StaticOpenApiValidatorCache::$validatorCache`. For example:
+
+```php
+<?php
+
+use Gertjuhh\SymfonyOpenapiValidator\StaticOpenApiValidatorCache;
+use Symfony\Component\Cache\Adapter\ArrayAdapter;
+
+StaticOpenApiValidatorCache::$validatorCache = new ArrayAdapter();
+```
+
+This snippet can be embedded in a bootstrap script for PHPUnit.
+
 ## Example
 
 ```PHP
