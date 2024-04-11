@@ -39,8 +39,11 @@ In order to activate this cache, you can pass a PSR-6 cache instance to the stat
 use Gertjuhh\SymfonyOpenapiValidator\StaticOpenApiValidatorCache;
 use Symfony\Component\Cache\Adapter\ArrayAdapter;
 
-StaticOpenApiValidatorCache::$validatorCache = new ArrayAdapter();
+StaticOpenApiValidatorCache::$validatorCache = new ArrayAdapter(storeSerialized: false);
 ```
+
+Setting `storeSerialized` to false on the ArrayAdapter instance is recommended as it lowers memory usage by storing the actual objects; 
+otherwise, Symfony will store a serialized representation of the OpenAPI schema and deserialize it on every test run. 
 
 This snippet can be embedded in a bootstrap script for PHPUnit.
 
