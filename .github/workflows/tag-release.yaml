@@ -11,7 +11,7 @@ jobs:
     # Only run on main branch, not for workflow_dispatch for example
     if: github.ref == 'refs/heads/main'
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - uses: actions/github-script@v7
         id: determine_pull_request
         with:
