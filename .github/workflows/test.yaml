@@ -28,6 +28,6 @@ jobs:
         with:
           php-version: ${{ matrix.php-version }}
           ini-values: assert.exception=1, zend.assertions=1
-      - uses: ramsey/composer-install@v3
+      - uses: ramsey/composer-install@v4
       - name: PHPUnit
         run: vendor/bin/phpunit
